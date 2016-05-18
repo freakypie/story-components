@@ -1,0 +1,26 @@
+{
+  "name": "story-components",
+  "homepage": "https://github.com/freakypie/story-components",
+  "authors": [
+    "John Leith <jleith@velocitywebworks.com>"
+  ],
+  "description": "A collection of polymer elements for choose your own adventure stories",
+  "main": "index.html",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "webcomponentsjs": "^0.7.22",
+    "polymer": "^1.4.0",
+    "paper-card": "polymerelements/paper-card#^1.1.1"
+  },
+  "devDependencies": {
+    "iron-component-page": "^1.1.6"
+  }
+}

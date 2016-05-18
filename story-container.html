@@ -1,0 +1,93 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="./story-scene.html">
+
+<!-- @demo demo/index.html -->
+
+<dom-module id="story-container">
+  <style>
+    :host {
+      display: block;
+      box-sizing: border-box;
+      background: white;
+      overflow: hidden;
+    }
+    :host ::content .story-cont {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* move to story-scene */
+    :host ::content .story-content.muted {
+      color: lightgrey;
+      background: #EEE;
+    }
+    :host ::content div.button {
+      display: block;
+      /*flex-direction: column;*/
+      text-align: left;
+      padding: 15px;
+      border: none;
+      border-bottom: 1px solid grey;
+      background: transparent;
+      cursor: pointer;
+    }
+    :host ::content div.button p {
+      padding: 0;
+      margin: 0;
+    }
+    :host ::content div.button.muted {
+      color: lightgrey;
+      background: #EEE;
+    }
+    :host ::content .story-cont > * {
+      flex: 0 0 auto;
+    }
+    :host ::content .story-cont > .story-content {
+      flex: 1 1 auto;
+      position: relative;
+    }
+
+    :host ::content .story-cont .spacer {
+      min-height: 10px;
+      flex: 2 1 auto;
+    }
+    :host ::content button:last-child {
+      border: none;
+    }
+    :host ::content #scene-name {
+      color: lightgrey;
+    }
+    :host .status-bar {
+      background: black;
+      color: white;
+    }
+    :host .status-bar button {
+      background: grey;
+      border: none;
+      color: white;
+      float: right;
+    }
+  </style>
+  <template>
+    <div class="story-cont">
+      <div class="story-content"></div>
+      <!-- <div class="spacer"></div> -->
+      <!-- <div class="choices">
+        choices
+      </div> -->
+      <div class="status-bar">
+        <button value="back">Back</button>
+        <button value="restart">Restart</button>
+        <b id="scene-name"></b>
+      </div>
+    </div>
+  </template>
+
+  <script src="./story-container.js"></script>
+
+</dom-module>

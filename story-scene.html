@@ -1,0 +1,301 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="./ty-p.html">
+
+<dom-module id="story-scene">
+  <style>
+    :host {
+      background: white;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      min-width: 200px;
+      min-height: 200px;
+      max-width: 100%;
+      max-height: 100%;
+      transform: translateZ(0);
+      transform-origin: -50% 150%;
+      opacity: 0.7;
+      transition: all 300ms;
+      box-shadow: 10px 0px 10px grey;
+    }
+    :host.active {
+      opacity: 1;
+      z-index: 1;
+      transition: all 600ms;
+    }
+    :host.destroyed {
+      opacity: 1;
+      z-index: 2;
+      transform: translatex(-120%);
+    }
+    :host .background {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden
+    }
+    :host .background img {
+      /* TODO: make it fit */
+      max-width: 100%;
+    }
+    :host .background.blur img {
+      -webkit-filter: blur(2px);
+      -moz-filter: blur(2px);
+    }
+    :host .content {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      padding: 5px;
+      box-sizing: border-box;
+      transform: translateX(100%);
+      transition: 300ms;
+      overflow-y: auto;
+    }
+    :host .hide {
+      display: none;
+    }
+    :host .prev {
+      float: left;
+    }
+    :host .next {
+      float: right;
+    }
+    :host .choices paper-button {
+      clear: right;
+      float: right;
+    }
+    :host .choices paper-button.muted {
+      background: #eee;
+      color: grey;
+    }
+    :host .actions {
+      position: absolute;
+      width: 100%;
+      bottom: 0;
+      padding: 5px 0;
+    }
+    :host .in {
+      transform: translateX(0);
+    }
+    :host .out {
+      transform: translateX(-100%);
+    }
+  </style>
+  <template>
+    <div class="background blur"></div>
+    <div class="text">
+      <div class="content-area"></div>
+      <div class="actions">
+        <!-- TODO: make this button optional -->
+        <paper-button class="prev" raised
+                      on-click="handlePrevButton">
+          <iron-icon icon="arrow-back"></iron-icon>
+          Prev
+        </paper-button>
+
+        <paper-button class="next" raised
+                      on-click="handleNextButton">
+          Next
+          <iron-icon icon="arrow-forward"></iron-icon>
+        </paper-button>
+        <div class="choices hide"></div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'story-scene',
+      properties: {
+        player: {
+          type: "object",
+          default: {}
+        },
+        comparisonsInverted: {
+          value: {
+            "=": function(a, b) {
+              return a != b;
+            },
+            ">=": function(a, b) {
+              return a < b;
+            },
+            "<=": function(a, b) {
+              return a > b;
+            },
+            ">": function(a, b) {
+              return a <= b;
+            },
+            "<": function(a, b) {
+              return a >= b;
+            }
+          }
+        },
+      },
+      listeners: {
+        "click": "handleClick",
+        "transitionend": "_transitionend",
+        "finished": "finishedTyping",
+      },
+      handleClick: function() {
+        if (this.current) {
+          this.current.fillNode();
+        }
+      },
+      finishedTyping: function() {
+        if (this.current.nextSibling) {
+          this.querySelector(".next").classList.remove("hide");
+        } else {
+          this.querySelector(".choices").classList.remove("hide");
+        }
+      },
+      _transitionend: function() {
+        if (this.destroyed) {
+          this.remove();
+        }
+      },
+      ready: function() {
+      },
+      destroy: function() {
+        this.destroyed = true;
+        this.classList.add("destroyed");
+        setTimeout(function() {
+
+        }.bind(this), 5000);
+      },
+      playerHas: function(tags) {
+        var visible = true;
+        if (tags.length > 0) {
+          for (var tag of tags) {
+            if (this.comparisonsInverted[tag.comparison](
+                  this.player[tag.tag] || 0, tag.value)) {
+                visible = false;
+                break;
+            }
+          }
+        }
+        return visible;
+      },
+      renderTags: function(tags, labelType) {
+        var taglist = [];
+        var comp = ": ";
+        if (! labelType) {
+          labelType = "info";
+        }
+        for(var tag of tags) {
+          comp = tag.comparison || ": ";
+          taglist.push(
+            "<span class='label label-" + labelType + "'>" +
+            tag.tag + comp + tag.value + "</span>");
+        }
+        return taglist.join(" ");
+      },
+      loadJson: function(scene_json) {
+        if (typeof scene_json == "string") {
+          scene_json = JSON.parse(scene_json);
+        }
+        this.json = scene_json;
+        this.background = this.json.image;
+        this.content = scene_json.content;
+        this.choices = scene_json.choices;
+        this.current = null;
+        this.audio = new Audio();
+
+        // render background
+        if (this.json.image) {
+          var bg = new Image();
+          bg.src = this.json.image;
+          Polymer.dom(this.$$(".background")).appendChild(bg);
+        }
+
+        // render content
+        var textNode = this.$$(".content-area")
+        for (var content of this.content) {
+          var container = document.createElement("ty-p");
+
+          if (content.audio) {
+            container.setAttribute("data-audio", content.audio);
+          }
+          container.classList.add("content");
+          container.innerHTML = content.text;
+          Polymer.dom(textNode).appendChild(container);
+        }
+
+        // render choices
+        var choice = null;
+        var choiceContainer = this.querySelector(".choices");
+        var choiceText = document.createElement("div");
+        choiceText.classList.add("content-text");
+
+        this.choices.forEach(function(c) {
+          valid = this.playerHas(c.tags);
+          choice = document.createElement("paper-button");
+          choice.raised = true;
+          if (valid || this.debug) {
+            if (! valid) {
+              choice.classList.add("muted");
+            }
+            var text = c.text + " <iron-icon icon='arrow-forward'></iron-icon>"
+            if (this.debug) {
+              text = this.renderTags(c.tags, "warning") + text;
+              if (c.consequences.length) {
+                text += " " + this.renderTags(c.consequences);
+              }
+            }
+            choice.innerHTML = text;
+            choice.value = c.next_scene;
+            choice.addEventListener("click", this.handleChoiceClick.bind(this, c), true);
+            Polymer.dom(choiceText).appendChild(choice);
+          }
+        }.bind(this));
+        Polymer.dom(choiceContainer).appendChild(choiceText);
+
+        this.updateContent(textNode.firstChild);
+        setTimeout(function() {
+          this.classList.add("active");
+        }.bind(this), 0);
+      },
+      updateContent: function(next, back) {
+        if (this.current) {
+          // this.current.style.display = "none";
+          if (back) {
+            this.current.classList.remove("out");
+          } else {
+            this.current.classList.add("out");
+          }
+          this.current.classList.remove("in");
+          this.audio.pause();
+        }
+        if (next) {
+          if (next.getAttribute("data-audio")) {
+            this.audio.src = next.getAttribute("data-audio");
+            this.audio.play();
+          }
+          this.current = next;
+          this.current.classList.remove("out");
+          this.current.classList.add("in");
+          this.current.start();
+
+          if (!this.current.previousSibling) {
+            this.querySelector(".prev").classList.add("hide");
+          }
+          this.querySelector(".next").classList.add("hide");
+          this.querySelector(".choices").classList.add("hide");
+        }
+      },
+      handlePrevButton: function() {
+        this.updateContent(this.current.previousSibling, true);
+      },
+      handleNextButton: function() {
+        this.updateContent(this.current.nextSibling);
+      },
+      handleChoiceClick: function(e) {
+        this.fire("choice", e)
+      }
+    });
+  </script>
+
+</dom-module>

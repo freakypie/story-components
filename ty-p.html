@@ -1,0 +1,111 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="ty-p">
+  <script>
+    Polymer({
+      is: 'ty-p',
+      properties: {
+        /** Should the element start typing when it is ready? */
+        auto: {
+          type: "boolean",
+          value: true,
+        },
+
+        /** how long to delay betwen each keypress */
+        timeout: { type: "integer", value: 10 },
+
+        /** increase delay on these special characters */
+        delayChars: {
+          value: {
+            "?": 300,
+            ".": 200,
+            ";": 150,
+            ",": 100,
+            ":next:": 0
+          }
+        }
+      },
+      listeners: {
+        click: "_handleClick",
+        tap: "_handleClick",
+      },
+      ready: function() {
+        if (this.auto) this.start();
+      },
+
+      /** start typing */
+      start() {
+        // prevent second start
+        if ( ! this.continue) {
+          this.continue = true;
+          this.tempTimeout = 0;
+          this.nodes = [];
+
+          // find all text nodes, copy text, and clear them
+          var n;
+          var walk = document.createTreeWalker(
+            this, NodeFilter.SHOW_TEXT, null, false);
+          while(n = walk.nextNode()) {
+            this.nodes.push({node: n, text: Array.from(n.textContent)});
+            n.textContent = "";
+          }
+
+          // get first node and start typing
+          this.node = this.nodes.shift();
+          this.appendNextChar();
+        }
+      },
+
+      _scheduleNextChar: function() {
+        setTimeout(function() {
+          requestAnimationFrame(this.appendNextChar.bind(this));
+        }.bind(this), this.timeout + this.tempTimeout);
+        this.tempTimeout = 0;
+      },
+
+      appendNextChar: function() {
+        if (! this.node || this.node.text.length == 0) {
+          if (this.nodes.length > 0) {
+            this.node = this.nodes.shift();
+            this.tempTimeout += this.delayChars[":next:"] || 0;
+          } else {
+            this.continue = false;
+            this.fire("finished");
+          }
+        }
+        if (this.continue) {
+          this._scheduleNextChar();
+
+          var c = this.node.text.shift();
+          this.node.node.textContent += c;
+          this.tempTimeout += this.delayChars[c] || 0;
+        }
+      },
+
+      /** fill in all of the characters from the given node */
+      fillNode: function(node) {
+        if (node) {
+          node.node.textContent += node.text.join("");
+          node.text.length = 0;
+        }
+      },
+
+      /** fill in all remaining characters from all nodes */
+      fillAll: function() {
+        if (this.node) {
+          this.nodes.unshift(this.node);
+        }
+        this.nodes.forEach(this.fillNode);
+      },
+
+      detach: function() {
+        this.continue = false;
+      },
+
+      _handleClick: function() {
+        this.fillNode(this.node);
+      }
+    });
+  </script>
+
+</dom-module>

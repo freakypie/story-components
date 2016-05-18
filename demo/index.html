@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>seed-element Demo</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../all.html">
+    <style>
+      .story-block {
+        position: relative;
+        overflow: hidden;
+        border: 2px solid grey;
+      }
+    </style>
+  </head>
+  <body>
+
+
+    <h2>Ty-p</h2>
+    <ty-p>the <code>ty-p</code> element will type out the text in it's contents</ty-p><br>
+    <ty-p><code>ty-p</code> also supports <b>nested <i>tags</i></b></ty-p><br>
+    <ty-p><code>ty-p</code> will pause, when it hits special characters. See that? I think it is cool...</ty-p>
+
+    <h2>Scene</h2>
+    <p>
+      A <code>story-scene</code> is a single node in a story.
+      It is meant to end with a choice which will direct the player to other scenes
+    </p>
+    <div class="story-block" style="width: 320px; height: 200px;">
+      <story-scene id="scene"></story-scene>
+    </div>
+    <script>
+      document.querySelector("#scene").loadJson({
+        "content": [
+          {"text": "<p>Once upon a time, there was a princess who had a golden ball. She loved this ball more than anything else except for perhaps, her golden racket which she used to hit the ball for sport. One day she hit her golden ball just a little too hard and it sailed into the castle well.</p>"},
+          {"text": "<p>The princess was devastated, for the ball quickly sank out of her reach and she knew she would never play her beloved game again. With a heavy heart she sat on the low wall surrounding the well and began to cry.</p>"}
+        ],
+        "meta": {"name": "__Princess drops her ball", "id": 1},
+        "choices": [{"text": "Next", "next_scene": 2, "consequences": [], "tags": []}]
+      })
+    </script>
+
+    <h2>Story</h2>
+    <story-container style="width: 100%; height: 220px" class="story-block" id="story"></story-container>
+    <script>
+      document.querySelector("#story").loadJson({
+        "meta": {
+          "start": 1,
+          "name": " The Princess and the Frog"
+        },
+        "scenes": [
+          {
+            "content": [
+              {"text": "<p>Once upon a time, there was a princess who had a golden ball. She loved this ball more than anything else except for perhaps, her golden racket which she used to hit the ball for sport. One day she hit her golden ball just a little too hard and it sailed into the castle well.</p>"},
+              {"text": "<p>The princess was devastated, for the ball quickly sank out of her reach and she knew she would never play her beloved game again. With a heavy heart she sat on the low wall surrounding the well and began to cry.</p>"}
+            ],
+            "meta": {"name": "__Princess drops her ball", "id": 1},
+            "choices": [{"text": "Next", "next_scene": 2, "consequences": [], "tags": []}]
+          },
+          {
+            "content": [
+              {"text": "<p>\"Princess! Princess, I see you have lost your ball. I would be happy to swim down and fetch it for you...\"</p>", "audio": null, "tags": []},
+              {"text": "<p>At first she did not hear the voice that called out to her because it was a small voice that came out as more of a croak. But it called out again and again until finally she looked down and saw a small frog perched on the well by her leg.</p>", "audio": null, "tags": []},
+              {"text": "<p>When he saw that he finally had her attention he added, \"I will fetch your golden ball. All that I require is that you take me to your castle. Let me spend the day with you so I am not lonely, eat from your plate so I do not starve, and sleep on your pillow so I will be comfortable as I rest.\"</p>", "audio": null, "tags": []}
+            ],
+            "meta": {"name": "Frog Offer", "id": 2},
+            "choices": [
+              {"text": "\"Anything! Just bring my ball back!\"", "next_scene": 1, "consequences": [], "tags": []},
+              {"text": "Scream and run away!", "next_scene": 1, "consequences": [], "tags": []}
+            ]
+          }
+        ]
+      });
+    </script>
+  </body>
+</html>
