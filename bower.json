@@ -18,7 +18,8 @@
   "dependencies": {
     "webcomponentsjs": "^0.7.22",
     "polymer": "^1.4.0",
-    "paper-card": "polymerelements/paper-card#^1.1.1"
+    "paper-card": "polymerelements/paper-card#^1.1.1",
+    "paper-button": "polymerelements/paper-button#^1.0.11"
   },
   "devDependencies": {
     "iron-component-page": "^1.1.6"
