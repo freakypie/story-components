@@ -281,6 +281,8 @@
 
           if (!this.current.previousSibling) {
             this.querySelector(".prev").classList.add("hide");
+          } else {
+            this.querySelector(".prev").classList.remove("hide");
           }
           this.querySelector(".next").classList.add("hide");
           this.querySelector(".choices").classList.add("hide");

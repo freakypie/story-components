@@ -1,6 +1,12 @@
 <link rel="import" href="../polymer/polymer.html">
 
 <dom-module id="ty-p">
+  <style>
+    :host ::content img {
+      transition: all 300ms;
+    }
+  </style>
+  <template><content></content></template>
   <script>
     Polymer({
       is: 'ty-p',
@@ -17,10 +23,12 @@
         /** increase delay on these special characters */
         delayChars: {
           value: {
+            "!": 300,
             "?": 300,
             ".": 200,
             ";": 150,
             ",": 100,
+            "<img>": 500,
             ":next:": 0
           }
         }
@@ -44,10 +52,16 @@
           // find all text nodes, copy text, and clear them
           var n;
           var walk = document.createTreeWalker(
-            this, NodeFilter.SHOW_TEXT, null, false);
+            this, NodeFilter.SHOW_ALL, null, false);
           while(n = walk.nextNode()) {
-            this.nodes.push({node: n, text: Array.from(n.textContent)});
-            n.textContent = "";
+            if (n.nodeName == "#text") {
+              this.nodes.push({node: n, text: Array.from(n.textContent)});
+              n.textContent = "";
+            } else if (n.nodeName == "IMG") {
+              this.nodes.push({node: n, text: ["i"], image: true});
+              n.style.opacity = 0;
+              n.style.height = 0;
+            }
           }
 
           // get first node and start typing
@@ -74,11 +88,20 @@
           }
         }
         if (this.continue) {
-          this._scheduleNextChar();
 
-          var c = this.node.text.shift();
-          this.node.node.textContent += c;
-          this.tempTimeout += this.delayChars[c] || 0;
+          if (this.node.image) {
+            console.log(this.node.node, this.node.node.naturalHeight);
+            this.node.node.style.opacity = 1;
+            this.node.node.style.height = this.node.node.naturalHeight + "px";
+            this.node.text.length = 0;
+            this.tempTimeout += this.delayChars["<img>"] || 0;
+          } else {
+            var c = this.node.text.shift();
+            this.node.node.textContent += c;
+            this.tempTimeout += this.delayChars[c] || 0;
+          }
+
+          this._scheduleNextChar();
         }
       },
 
