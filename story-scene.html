@@ -42,6 +42,11 @@
       /* TODO: make it fit */
       max-width: 100%;
     }
+    :host .background .bg-div {
+      background-size: cover;
+      width: 100%;
+      height: 100%;
+    }
     :host .background.blur img {
       -webkit-filter: blur(2px);
       -moz-filter: blur(2px);
@@ -206,8 +211,9 @@
 
         // render background
         if (this.json.image) {
-          var bg = new Image();
-          bg.src = this.json.image;
+          var bg = document.createElement("DIV");
+          bg.style.backgroundImage = "url(" + this.json.image + ")";
+          bg.classList.add("bg-div")
           Polymer.dom(this.$$(".background")).appendChild(bg);
         }
 

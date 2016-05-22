@@ -46,12 +46,13 @@ Polymer({
     }
   },
   getSceneById: function(id) {
-    for (var scene of this.scenes) {
+    var retval = null;
+    this.scenes.forEach(function(scene) {
       if (scene.meta.id === id) {
-        return scene;
+        retval = scene;
       }
-    }
-    return null;
+    });
+    return retval;
   },
   defaultPlayerData: function() {
     return {choices: []};
