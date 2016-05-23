@@ -4,6 +4,8 @@
   <style>
     :host ::content img {
       transition: all 300ms;
+      transform: scale(0);
+      display: block;
     }
   </style>
   <template><content></content></template>
@@ -60,13 +62,23 @@
             } else if (n.nodeName == "IMG") {
               this.nodes.push({node: n, text: ["i"], image: true});
               n.style.opacity = 0;
-              n.style.height = 0;
+              // n.style.height = 0;
+              // n.style.width = 0;
+              n.loaded = false;
+              n.onload = this._loadImage.bind(this)
             }
           }
 
           // get first node and start typing
           this.node = this.nodes.shift();
           this.appendNextChar();
+        }
+      },
+
+      _loadImage: function(e) {
+        console.log(this, e);
+        if (this._waitingOnImage) {
+          this._scheduleNextChar();
         }
       },
 
@@ -90,18 +102,23 @@
         if (this.continue) {
 
           if (this.node.image) {
-            console.log(this.node.node, this.node.node.naturalHeight);
             this.node.node.style.opacity = 1;
-            this.node.node.style.height = this.node.node.naturalHeight + "px";
-            this.node.text.length = 0;
-            this.tempTimeout += this.delayChars["<img>"] || 0;
+            if (this.node.node.naturalWidth > 0) {
+              // this.node.node.style.width = this.node.node.naturalWidth + "px";
+              // this.node.node.style.height = this.node.node.naturalHeight + "px";
+              this.node.node.style.transform = "scale(1)";
+              this.node.text.length = 0;
+              this.tempTimeout += this.delayChars["<img>"] || 0;
+              this._scheduleNextChar();
+            } else {
+              this._waitingOnImage = true
+            }
           } else {
             var c = this.node.text.shift();
             this.node.node.textContent += c;
             this.tempTimeout += this.delayChars[c] || 0;
+            this._scheduleNextChar();
           }
-
-          this._scheduleNextChar();
         }
       },
 
