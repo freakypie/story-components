@@ -139,7 +139,10 @@ Polymer({
     this.scene = scene;
 
     if (this.debug) {
+      this.querySelector(".status-bar").style.display = "block";
       this.querySelector("#scene-name").innerHTML = scene.meta.name;
+    } else {
+      this.querySelector(".status-bar").style.display = "none";
     }
 
     Array.prototype.forEach.call(contentArea.querySelectorAll("story-scene"), function(old) {
@@ -201,7 +204,16 @@ Polymer({
     }
 
     // find the correct scene
-    scene = this.getSceneById(id);
+    this.loadSceneById(id);
+  },
+  restart: function() {
+    this.player = this.defaultPlayerData();
+    this.savePlayer();
+    var id = this.firstScene.meta.id;
+    this.loadSceneById(id);
+  },
+  loadSceneById: function(id) {
+    var scene = this.getSceneById(id);
     if (scene.meta.id === id) {
       this.renderScene(scene);
     } else {
