@@ -52,6 +52,9 @@ Polymer({
         retval = scene;
       }
     });
+    if (! retval) {
+      console.error("can't find scene", id);
+    }
     return retval;
   },
   defaultPlayerData: function() {
@@ -73,9 +76,9 @@ Polymer({
     return retval || this.defaultPlayerData();
   },
   savePlayerChoice: function(e) {
-    for(var ca of e.consequences) {
+    (e.consequences || []).forEach(function(ca) {
       this.player[ca.tag] = (this.player[ca.tag] || 0) + ca.value;
-    }
+    }.bind(this));
     if (! this.player.choices) {
       this.player.choices = [];
     }
@@ -91,11 +94,11 @@ Polymer({
     if (new_player.choices.length) {
       new_player.choices.pop();
 
-      for(var choice of this.player.choices) {
-        for (var ca of choice.consequences) {
+      this.player.choices.forEach(function(choice) {
+        choice.consequences.forEach(function(ca) {
           new_player[ca.tag] = (new_player[ca.tag] || 0) + ca.value;
-        }
-      }
+        });
+      });
     }
     this.player = new_player;
     this.savePlayer();
@@ -123,12 +126,12 @@ Polymer({
     if (! labelType) {
       labelType = "info";
     }
-    for(var tag of tags) {
+    tags.forEach(function(tag) {
       comp = tag.comparison || ": ";
       taglist.push(
         "<span class='label label-" + labelType + "'>" +
         tag.tag + comp + tag.value + "</span>");
-    }
+    });
     return taglist.join(" ");
   },
   renderScene: function(scene) {
@@ -182,13 +185,21 @@ Polymer({
 
     if (e.detail.next_scene) {
       id = e.detail.next_scene;
-      this.savePlayerChoice(e.detail);
+      if (id !== "finish") {
+        this.savePlayerChoice(e.detail);
+      }
     } else {
       id = e.target.value;
     }
 
+    // check for finish
+    if (id == "finish") {
+      var event = new CustomEvent("story:finished");
+      this.parentElement.dispatchEvent(event);
+      id = null;
+
     // check for back
-    if (id == "back") {
+    } else if (id == "back") {
       this.revertPlayerChoice();
       if (this.player.choices.length > 0) {
         id = this.player.choices[this.player.choices.length - 1].next_scene;
@@ -204,7 +215,9 @@ Polymer({
     }
 
     // find the correct scene
-    this.loadSceneById(id);
+    if (id) {
+      this.loadSceneById(id);
+    }
   },
   restart: function() {
     this.player = this.defaultPlayerData();

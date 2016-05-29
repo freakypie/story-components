@@ -44,7 +44,7 @@
       },
 
       /** start typing */
-      start() {
+      start: function() {
         // prevent second start
         if ( ! this.continue) {
           this.continue = true;
@@ -57,7 +57,7 @@
             this, NodeFilter.SHOW_ALL, null, false);
           while(n = walk.nextNode()) {
             if (n.nodeName == "#text") {
-              this.nodes.push({node: n, text: Array.from(n.textContent)});
+              this.nodes.push({node: n, text: n.textContent.split("")});
               n.textContent = "";
             } else if (n.nodeName == "IMG") {
               this.nodes.push({node: n, text: ["i"], image: true});

@@ -175,13 +175,12 @@
       playerHas: function(tags) {
         var visible = true;
         if (tags.length > 0) {
-          for (var tag of tags) {
+          tags.forEach(function(tag) {
             if (this.comparisonsInverted[tag.comparison](
                   this.player[tag.tag] || 0, tag.value)) {
                 visible = false;
-                break;
             }
-          }
+          }.bind(this));
         }
         return visible;
       },
@@ -191,12 +190,12 @@
         if (! labelType) {
           labelType = "info";
         }
-        for(var tag of tags) {
+        tags.forEach(function(tag) {
           comp = tag.comparison || ": ";
           taglist.push(
             "<span class='label label-" + labelType + "'>" +
             tag.tag + comp + tag.value + "</span>");
-        }
+        });
         return taglist.join(" ");
       },
       loadJson: function(scene_json) {
@@ -220,7 +219,11 @@
 
         // render content
         var textNode = this.$$(".content-area")
-        for (var content of this.content) {
+
+        // DEBUG: to reduce the length of the scenes
+        // this.content = this.content.slice(0, 1);
+
+        this.content.forEach(function(content) {
           var container = document.createElement("ty-p");
 
           if (content.audio) {
@@ -229,7 +232,7 @@
           container.classList.add("content");
           container.innerHTML = content.text;
           Polymer.dom(textNode).appendChild(container);
-        }
+        });
 
         // render choices
         var choice = null;
@@ -237,8 +240,16 @@
         var choiceText = document.createElement("div");
         choiceText.classList.add("content-text");
 
+        // if there are no choices this is an end node
+        if (this.choices.length === 0) {
+          this.choices.push({
+            next_scene: "finish",
+            text: "Next",
+          });
+        }
+
         this.choices.forEach(function(c) {
-          valid = this.playerHas(c.tags);
+          valid = this.playerHas(c.tags || []);
           choice = document.createElement("paper-button");
           choice.raised = true;
           if (valid || this.debug) {
@@ -247,7 +258,7 @@
             }
             var text = c.text + " <iron-icon icon='arrow-forward'></iron-icon>"
             if (this.debug) {
-              text = this.renderTags(c.tags, "warning") + text;
+              text = this.renderTags(c.tags || [], "warning") + text;
               if (c.consequences.length) {
                 text += " " + this.renderTags(c.consequences);
               }
