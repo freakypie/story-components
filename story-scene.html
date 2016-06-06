@@ -62,7 +62,10 @@
       display: none;
     }
     :host .prev {
-      float: left;
+      position: absolute;
+      left: 0;
+      bottom: 5px;
+      z-index: 3;
     }
     :host .next {
       float: right;
@@ -73,6 +76,7 @@
     }
     :host paper-button {
       background: white;
+      margin-top: 5px;
     }
     :host .choices paper-button.muted {
       background: #eee;
@@ -80,7 +84,7 @@
     }
     :host .actions {
       position: absolute;
-      width: 100%;
+      right: 0;
       bottom: 0;
       padding: 5px 0;
     }
@@ -95,13 +99,12 @@
     <div class="background blur"></div>
     <div class="text">
       <div class="content-area"></div>
+      <!-- TODO: make this button optional -->
+      <paper-button class="prev" raised on-click="handlePrevButton">
+        <iron-icon icon="arrow-back"></iron-icon>
+        Prev
+      </paper-button>
       <div class="actions">
-        <!-- TODO: make this button optional -->
-        <paper-button class="prev" raised
-                      on-click="handlePrevButton">
-          <iron-icon icon="arrow-back"></iron-icon>
-          Prev
-        </paper-button>
 
         <paper-button class="next" raised
                       on-click="handleNextButton">
@@ -174,10 +177,33 @@
       },
       playerHas: function(tags) {
         var visible = true;
+        var value = null;
+        var func = null;
+
         if (tags.length > 0) {
           tags.forEach(function(tag) {
+            value = parseInt(tag.value);
+            if (! value && value !== 0) {
+              if (tag.value == "all") {
+                func = function() {
+                  var values = [];
+                  for (var key in this.player) {
+                    if (key != tag.tag && key != "choices") {
+                      values.push(this.player[key]);
+                    }
+                  }
+                  return Math.max.apply(Math, values);
+                }
+              } else {
+                func = function() {
+                  return this.player[tag.value] || 0;
+                }
+              }
+              value = func.call(this);
+            }
+
             if (this.comparisonsInverted[tag.comparison](
-                  this.player[tag.tag] || 0, tag.value)) {
+                  this.player[tag.tag] || 0, value)) {
                 visible = false;
             }
           }.bind(this));
@@ -232,6 +258,17 @@
           container.classList.add("content");
           container.innerHTML = content.text;
           Polymer.dom(textNode).appendChild(container);
+
+          // TODO: put this in scene
+          //   var valid = this.playerHas(c.tags);
+          //   if (valid || this.debug) {
+          //     // contentParent = document.createElement("div");
+          //     // contentParent.appendChild(content);
+          //     if (! valid) {
+          //         content.classList.add("muted");
+          //     }
+          //     // Polymer.dom(content).innerHTML = this.renderTags(c.tags, "warning") + " " + c.text;
+          //   }
         });
 
         // render choices
@@ -257,6 +294,7 @@
               choice.classList.add("muted");
             }
             var text = c.text + " <iron-icon icon='arrow-forward'></iron-icon>"
+            console.log(this.debug);
             if (this.debug) {
               text = this.renderTags(c.tags || [], "warning") + text;
               if (c.consequences.length) {

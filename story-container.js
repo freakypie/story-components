@@ -3,11 +3,12 @@ Polymer({
   is: 'story-container',
   properties: {
     debug: {
-      type: "boolean",
-      value: false
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true
     },
     scene: {
-      type: "object",
+      type: Object,
       value: null
     }
   },
@@ -163,19 +164,6 @@ Polymer({
     content.loadJson(scene);
     contentArea.appendChild(content);
 
-    // TODO: put this in scene
-    // for (var c of scene.content) {
-    //   var valid = this.playerHas(c.tags);
-    //   if (valid || this.debug) {
-    //     // contentParent = document.createElement("div");
-    //     // contentParent.appendChild(content);
-    //     if (! valid) {
-    //         content.classList.add("muted");
-    //     }
-    //     // Polymer.dom(content).innerHTML = this.renderTags(c.tags, "warning") + " " + c.text;
-    //   }
-    // }
-
     // listen for choices
     this.listen(content, "choice", "handleChoice");
   },
@@ -194,8 +182,11 @@ Polymer({
 
     // check for finish
     if (id == "finish") {
-      var event = new CustomEvent("story:finished");
-      this.parentElement.dispatchEvent(event);
+      var event = new CustomEvent(
+        "story:finished",
+        {bubbles: true, cancelable: true}
+      );
+      this.dispatchEvent(event);
       id = null;
 
     // check for back
@@ -208,7 +199,7 @@ Polymer({
       }
 
     // check for reset
-    } else if (id == "restart" || id == "reset") {
+  } else if (id == "restart" || id == "reset" || ! id) {
       this.player = this.defaultPlayerData();
       this.savePlayer();
       id = this.firstScene.meta.id;
