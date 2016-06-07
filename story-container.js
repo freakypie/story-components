@@ -26,6 +26,7 @@ Polymer({
 
     // TODO: create the player with an empty set of tags
     // or initialized based on the game
+    console.log(this.parsed.id, this.parsed.meta.name, this.getPlayerKey());
     this.player = this.loadPlayer();
 
     [].forEach.call(
@@ -62,7 +63,7 @@ Polymer({
     return {choices: []};
   },
   getPlayerKey: function() {
-    return "player-" + this.parsed.meta.id;
+    return "player-" + this.parsed.id;
   },
   loadPlayer: function() {
     var retval = null;
@@ -70,6 +71,7 @@ Polymer({
     if (localStorage[name]) {
       try {
         retval = JSON.parse(localStorage[name]);
+        console.log(name, retval);
       } catch(ex) {
         console.error(ex);
       }

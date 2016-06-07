@@ -293,8 +293,7 @@
             if (! valid) {
               choice.classList.add("muted");
             }
-            var text = c.text + " <iron-icon icon='arrow-forward'></iron-icon>"
-            console.log(this.debug);
+            var text = c.text + " <iron-icon icon='arrow-forward'></iron-icon>";
             if (this.debug) {
               text = this.renderTags(c.tags || [], "warning") + text;
               if (c.consequences.length) {
