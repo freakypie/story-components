@@ -26,7 +26,6 @@ Polymer({
 
     // TODO: create the player with an empty set of tags
     // or initialized based on the game
-    console.log(this.parsed.id, this.parsed.meta.name, this.getPlayerKey());
     this.player = this.loadPlayer();
 
     [].forEach.call(
