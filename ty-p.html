@@ -65,7 +65,8 @@
               // n.style.height = 0;
               // n.style.width = 0;
               n.loaded = false;
-              n.onload = this._loadImage.bind(this)
+              n.onload = this._loadImage.bind(this);
+              n.onerror = this._loadImage.bind(this);
             }
           }
 
@@ -82,6 +83,7 @@
       },
 
       _scheduleNextChar: function() {
+        clearTimeout(this.__timeout);
         setTimeout(function() {
           requestAnimationFrame(this.appendNextChar.bind(this));
         }.bind(this), this.timeout + this.tempTimeout);
@@ -111,6 +113,11 @@
               this._scheduleNextChar();
             } else {
               this._waitingOnImage = true
+              this.__timeout = setTimeout(function() {
+                this._waitingOnImage = false;
+                this.node.text.length = 0;
+                this._scheduleNextChar();
+              }.bind(this), 100);
             }
           } else {
             var c = this.node.text.shift();
