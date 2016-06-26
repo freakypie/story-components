@@ -131,6 +131,9 @@
             "=": function(a, b) {
               return a != b;
             },
+            "==": function(a, b) {
+              return a != b;
+            },
             ">=": function(a, b) {
               return a < b;
             },
@@ -175,6 +178,7 @@
         }
       },
       ready: function() {
+        window.addEventListener("story:fast-forward", this.fastforward.bind(this));
       },
       destroy: function() {
         this.destroyed = true;
@@ -258,26 +262,26 @@
         // this.content = this.content.slice(0, 1);
 
         this.content.forEach(function(content) {
-          var container = document.createElement("ty-p");
+          var valid = this.playerHas(content.tags);
+          if (valid || this.debug) {
 
-          if (content.audio) {
-            container.setAttribute("data-audio", content.audio);
+            var container = document.createElement("ty-p");
+
+            // TODO: add audio
+            // if (content.audio) {
+            //   container.setAttribute("data-audio", content.audio);
+            // }
+            container.classList.add("content");
+            container.innerHTML = content.text;
+
+            // if the content isn't valid, then it is for debugging
+            if (! valid) {
+              container.classList.add("muted");
+            }
+
+            Polymer.dom(textNode).appendChild(container);
           }
-          container.classList.add("content");
-          container.innerHTML = content.text;
-          Polymer.dom(textNode).appendChild(container);
-
-          // TODO: put this in scene
-          //   var valid = this.playerHas(c.tags);
-          //   if (valid || this.debug) {
-          //     // contentParent = document.createElement("div");
-          //     // contentParent.appendChild(content);
-          //     if (! valid) {
-          //         content.classList.add("muted");
-          //     }
-          //     // Polymer.dom(content).innerHTML = this.renderTags(c.tags, "warning") + " " + c.text;
-          //   }
-        });
+        }.bind(this));
 
         // render choices
         var choice = null;
@@ -359,6 +363,9 @@
       },
       handleChoiceClick: function(e) {
         this.fire("choice", e)
+      },
+      fastforward: function() {
+        this.updateContent(this.current.parentElement.lastChild);
       }
     });
   </script>
