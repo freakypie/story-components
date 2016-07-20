@@ -12,6 +12,9 @@ Polymer({
       value: null
     }
   },
+  ready: function() {
+    this.dispatchEvent(new CustomEvent("ready", {bubbles: true}));
+  },
   loadJson: function(story_json) {
     this.story_json = story_json;
 
@@ -39,7 +42,7 @@ Polymer({
     // get the starting scene from data
     this.firstScene = this.getSceneById(this.parsed.meta.start);
 
-    if (this.player.choices.length > 0) {
+    if (this.player.choices && this.player.choices.length > 0) {
       var e = this.player.choices[this.player.choices.length - 1];
       this.renderScene(this.getSceneById(e.next_scene));
     } else {
