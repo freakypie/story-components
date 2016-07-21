@@ -153,23 +153,27 @@ Polymer({
       this.querySelector(".status-bar").style.display = "none";
     }
 
+    var promises = []
     Array.prototype.forEach.call(contentArea.querySelectorAll("story-scene"), function(old) {
       if (old) {
-        old.destroy();
+        promises.push(old.destroy());
       }
     });
 
-    var content = null;
-    var valid = false;
+    Promise.all(promises).then(function() {
 
-    content = document.createElement("story-scene");
-    content.player = this.player;
-    content.debug = this.debug;
-    content.loadJson(scene);
-    contentArea.appendChild(content);
+      var content = null;
+      var valid = false;
 
-    // listen for choices
-    this.listen(content, "choice", "handleChoice");
+      content = document.createElement("story-scene");
+      content.player = this.player;
+      content.debug = this.debug;
+      content.loadJson(scene);
+      contentArea.appendChild(content);
+
+      // listen for choices
+      this.listen(content, "choice", "handleChoice");
+    }.bind(this));
   },
   handleChoice: function(e) {
     var id = null;

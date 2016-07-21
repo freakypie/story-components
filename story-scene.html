@@ -181,11 +181,13 @@
         window.addEventListener("story:fast-forward", this.fastforward.bind(this));
       },
       destroy: function() {
-        this.destroyed = true;
-        this.classList.add("destroyed");
-        setTimeout(function() {
-
-        }.bind(this), 5000);
+        return new Promise(function(resolve, reject) {
+          this.destroyed = true;
+          this.classList.add("destroyed");
+          setTimeout(function() {
+            resolve();
+          }.bind(this), 300);
+        }.bind(this));
       },
       playerHas: function(tags) {
         var visible = true;
