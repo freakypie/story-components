@@ -12,8 +12,9 @@ Polymer({
       value: null
     }
   },
-  ready: function() {
+  attached: function() {
     this.dispatchEvent(new CustomEvent("ready", {bubbles: true}));
+    this.isReady = true;
   },
   loadJson: function(story_json) {
     this.story_json = story_json;
