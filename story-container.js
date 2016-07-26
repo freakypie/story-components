@@ -173,54 +173,68 @@ Polymer({
 
       // listen for choices
       this.listen(content, "choice", "handleChoice");
+
+      // allow another choice to be clicked
+      setTimeout(function() {
+        this.handlingChoice = false;
+      }.bind(this), 1);
+
     }.bind(this));
   },
   handleChoice: function(e) {
-    var id = null;
-    var scene = null;
+    if (! this.handlingChoice) {
+      this.handlingChoice = true;
+      var id = null;
+      var scene = null;
 
-    if (e.detail.next_scene) {
-      id = e.detail.next_scene;
-      if (id !== "finish") {
-        this.savePlayerChoice(e.detail);
-      }
-    } else {
-      id = e.target.value;
-    }
-
-    // check for finish
-    if (id == "finish") {
-      var event = new CustomEvent(
-        "story:finished",
-        {bubbles: true, cancelable: true}
-      );
-      this.dispatchEvent(event);
-      id = null;
-
-    // check for back
-    } else if (id == "back") {
-      this.revertPlayerChoice();
-      if (this.player.choices.length > 0) {
-        id = this.player.choices[this.player.choices.length - 1].next_scene;
+      if (e.detail.next_scene) {
+        id = e.detail.next_scene;
+        if (id !== "finish") {
+          this.savePlayerChoice(e.detail);
+        }
       } else {
+        id = e.target.value;
+      }
+
+      // check for finish
+      if (id == "finish") {
+        var event = new CustomEvent(
+          "story:finished",
+          {bubbles: true, cancelable: true}
+        );
+        this.dispatchEvent(event);
+        id = null;
+
+      // check for back
+      } else if (id == "back") {
+        this.revertPlayerChoice();
+        if (this.player.choices.length > 0) {
+          id = this.player.choices[this.player.choices.length - 1].next_scene;
+        } else {
+          id = this.firstScene.meta.id;
+        }
+
+      // check for reset
+      } else if (id == "restart" || id == "reset" || ! id) {
+        this.player = this.defaultPlayerData();
+        this.savePlayer();
         id = this.firstScene.meta.id;
       }
 
-    // check for reset
-  } else if (id == "restart" || id == "reset" || ! id) {
-      this.player = this.defaultPlayerData();
-      this.savePlayer();
-      id = this.firstScene.meta.id;
-    }
-
-    // find the correct scene
-    if (id) {
-      this.loadSceneById(id);
+      // find the correct scene
+      if (id) {
+        this.loadSceneById(id);
+      }
     }
   },
   restart: function() {
     this.player = this.defaultPlayerData();
     this.savePlayer();
+
+    // destroy old scenes
+    this.$$(".story-content").innerHTML = "";
+
+    // reload
     var id = this.firstScene.meta.id;
     this.loadSceneById(id);
   },
