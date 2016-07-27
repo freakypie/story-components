@@ -188,8 +188,8 @@ Polymer({
       var id = null;
       var scene = null;
 
-      if (e.detail.next_scene) {
-        id = e.detail.next_scene;
+      if ("next_scene" in e.detail) {
+        id = e.detail.next_scene || "finish";
         if (id !== "finish") {
           this.savePlayerChoice(e.detail);
         }
