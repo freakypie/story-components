@@ -123,8 +123,12 @@
       is: 'story-scene',
       properties: {
         player: {
-          type: "object",
-          default: {}
+          type: Object,
+          value: {}
+        },
+        randomize: {
+          type: Boolean,
+          value: false
         },
         comparisonsInverted: {
           value: {
@@ -299,7 +303,13 @@
           });
         }
 
-        this.choices.forEach(function(c) {
+        // if random, shuffle choices
+        var choices = this.choices;
+        if (this.randomize) {
+          choices = this.shuffle(this.choices);
+        }
+
+        choices.forEach(function(c) {
           valid = this.playerHas(c.tags || []);
           choice = document.createElement("paper-button");
           choice.raised = true;
@@ -368,6 +378,14 @@
       },
       fastforward: function() {
         this.updateContent(this.current.parentElement.lastChild);
+      },
+      shuffle: function(array) {
+        var shuffled = [];
+        array.forEach(function(i) {
+          var index = Math.floor(Math.random() * (shuffled.length + 1));
+          shuffled.splice(index, 0, i);
+        });
+        return shuffled;
       }
     });
   </script>

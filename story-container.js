@@ -1,3 +1,4 @@
+
 /** Renders a lot of scenes */
 Polymer({
   is: 'story-container',
@@ -10,6 +11,11 @@ Polymer({
     scene: {
       type: Object,
       value: null
+    },
+    randomize: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true
     }
   },
   attached: function() {
@@ -74,7 +80,6 @@ Polymer({
     if (localStorage[name]) {
       try {
         retval = JSON.parse(localStorage[name]);
-        console.log(name, retval);
       } catch(ex) {
         console.error(ex);
       }
@@ -169,6 +174,7 @@ Polymer({
       content = document.createElement("story-scene");
       content.player = this.player;
       content.debug = this.debug;
+      content.randomize = this.randomize;
       content.loadJson(scene);
       contentArea.appendChild(content);
 
